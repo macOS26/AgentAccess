@@ -1,3 +1,0 @@
-module AgentAudit {
-    header "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/AgentAudit.build/include/AgentAudit-Swift.h"
-}

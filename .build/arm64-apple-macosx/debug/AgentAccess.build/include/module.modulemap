@@ -1,3 +1,0 @@
-module AgentAccess {
-    header "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/AgentAccess.build/include/AgentAccess-Swift.h"
-}

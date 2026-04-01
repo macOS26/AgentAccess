@@ -1,3 +1,0 @@
-module Commander {
-    header "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/Commander.build/include/Commander-Swift.h"
-}

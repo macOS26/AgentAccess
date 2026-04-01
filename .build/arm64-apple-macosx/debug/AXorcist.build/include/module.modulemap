@@ -1,3 +1,0 @@
-module AXorcist {
-    header "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/AXorcist.build/include/AXorcist-Swift.h"
-}
