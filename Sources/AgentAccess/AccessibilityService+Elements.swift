@@ -50,6 +50,71 @@ extension AccessibilityService {
         return elementProperties(wrapped)
     }
 
+    // MARK: - Open App and Get Elements
+
+    /// Launch/activate an app and return its interactive elements in one call.
+    /// This is the fastest way to discover what's clickable in an app.
+    @MainActor
+    public func openApp(_ appName: String?, maxDepth: Int = 5) -> String {
+        guard Self.hasAccessibilityPermission() else {
+            return errorJSON("Accessibility permission required.")
+        }
+        guard let appName = appName, !appName.isEmpty else {
+            return errorJSON("App name required")
+        }
+
+        let bundleId = resolveBundleId(appName)
+        guard let bid = bundleId else {
+            return errorJSON("Could not resolve app: \(appName)")
+        }
+
+        AuditLog.log(.accessibility, "openApp(\(appName) → \(bid))")
+
+        // Get app element (resolveBundleId already launched if needed)
+        guard let app = RunningApplicationHelper.applications(withBundleIdentifier: bid).first,
+              let appElement = Element.application(for: app) else {
+            return errorJSON("Could not get app element for \(bid)")
+        }
+
+        // Activate
+        _ = appElement.activate()
+
+        // Collect interactive elements (buttons, text fields, etc.)
+        var elements: [[String: Any]] = []
+        collectInteractive(appElement, depth: maxDepth, into: &elements)
+
+        return successJSON([
+            "app": bid,
+            "appName": app.localizedName ?? appName,
+            "elementCount": elements.count,
+            "elements": elements
+        ])
+    }
+
+    /// Recursively collect interactive elements (buttons, text fields, links, etc.)
+    @MainActor
+    private func collectInteractive(_ element: Element, depth: Int, into results: inout [[String: Any]]) {
+        guard depth > 0, results.count < 50 else { return }
+
+        // Check if this element is interactive
+        if element.isInteractive() {
+            let sz = element.size()
+            // Only include elements with actual size (visible on screen)
+            if sz != nil && sz!.width > 0 && sz!.height > 0 {
+                var info = elementProperties(element)
+                if let name = element.computedName() { info["computedName"] = name }
+                results.append(info)
+            }
+        }
+
+        // Recurse into children
+        if let children = element.children() {
+            for child in children {
+                collectInteractive(child, depth: depth - 1, into: &results)
+            }
+        }
+    }
+
     // MARK: - Web Content Scanning
 
     @MainActor
