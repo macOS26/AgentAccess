@@ -532,13 +532,13 @@ extension AccessibilityService {
                 }
             }
             if let logs = logs, !logs.isEmpty { result["logs"] = logs }
-            if let d = try? JSONSerialization.data(withJSONObject: result, options: .prettyPrinted),
+            if let d = try? JSONSerialization.data(withJSONObject: result, options: .sortedKeys),
                let s = String(data: d, encoding: .utf8) { return s }
             return "{\"success\": true}"
         case .error(let message, let code, let logs):
             var result: [String: Any] = ["success": false, "error": message, "errorCode": code.rawValue]
             if let logs = logs, !logs.isEmpty { result["logs"] = logs }
-            if let d = try? JSONSerialization.data(withJSONObject: result, options: .prettyPrinted),
+            if let d = try? JSONSerialization.data(withJSONObject: result, options: .sortedKeys),
                let s = String(data: d, encoding: .utf8) { return s }
             return errorJSON(message)
         }

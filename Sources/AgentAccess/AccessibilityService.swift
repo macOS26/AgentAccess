@@ -320,7 +320,7 @@ public final class AccessibilityService: @unchecked Sendable {
     }
 
     public func successJSON(_ data: Any) -> String {
-        if let d = try? JSONSerialization.data(withJSONObject: ["success": true, "data": data], options: .prettyPrinted),
+        if let d = try? JSONSerialization.data(withJSONObject: ["success": true, "data": data], options: .sortedKeys),
            let s = String(data: d, encoding: .utf8) { return s }
         return "{\"success\": true}"
     }
