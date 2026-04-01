@@ -247,7 +247,7 @@ extension AccessibilityService {
            let app = RunningApplicationHelper.applications(withBundleIdentifier: bundleId).first,
            let appElement = Element.application(for: app) {
             _ = appElement.activate()
-            Thread.sleep(forTimeInterval: 0.1)
+            Thread.sleep(forTimeInterval: 1.0)
         }
 
         // Use AXorcist PerformActionCommand — atomic find + press in one operation
@@ -268,23 +268,31 @@ extension AccessibilityService {
         case .success:
             return successJSON(["message": "Clicked element (AXPress via AXorcist command)"])
         case .error(let message, _, _):
-            // Fallback: find element ourselves and try click at position
-            if let found = findAXElement(role: role, title: title, value: value, appBundleId: appBundleId) {
-                // Wait for enabled
-                let enableStart = Date()
-                while found.isEnabled() == false, Date().timeIntervalSince(enableStart) < 5.0 {
-                    Thread.sleep(forTimeInterval: 0.2)
-                }
-                // Try position-based click via AXorcist InputDriver
-                if let pos = found.position(), let sz = found.size() {
-                    let center = CGPoint(x: pos.x + sz.width / 2, y: pos.y + sz.height / 2)
+            // AXorcist command failed — try finding element directly and pressing it
+            let startTime = Date()
+            while Date().timeIntervalSince(startTime) < 5.0 {
+                if let found = findAXElement(role: role, title: title, value: value, appBundleId: appBundleId) {
+                    // Wait for enabled
+                    let enableStart = Date()
+                    while found.isEnabled() == false, Date().timeIntervalSince(enableStart) < 5.0 {
+                        Thread.sleep(forTimeInterval: 0.2)
+                    }
+                    // Try AXPress on the found element
                     do {
-                        try InputDriver.click(at: center)
-                        return successJSON(["message": "Clicked element at center", "x": center.x, "y": center.y])
+                        try found.performAction(.press)
+                        let props = elementProperties(found)
+                        return successJSON(["message": "Clicked element (AXPress fallback)", "element": props])
                     } catch {
-                        return errorJSON("Click failed: \(error.localizedDescription)")
+                        // Last resort: click at element center if it has a frame
+                        if let frame = found.frame(), frame.width > 0, frame.height > 0 {
+                            do {
+                                try InputDriver.click(at: CGPoint(x: frame.midX, y: frame.midY))
+                                return successJSON(["message": "Clicked element at center", "x": frame.midX, "y": frame.midY])
+                            } catch {}
+                        }
                     }
                 }
+                Thread.sleep(forTimeInterval: 0.5)
             }
             return errorJSON("Click failed: \(message)")
         }
