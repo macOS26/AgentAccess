@@ -262,17 +262,12 @@ extension AccessibilityService {
         }
 
         // Step 2: Search the app's element tree for the target element
-        // Prefer visible, actionable elements (buttons with size > 0) over hidden menu items
         var found: Element?
         let startTime = Date()
         while Date().timeIntervalSince(startTime) < timeout {
             // Use AXorcist Element.findElements to search by role/title/value
             let results = root.findElements(role: role, title: title, label: nil, value: value, identifier: nil, maxDepth: 20)
-            // Pick the best match: prefer elements with size > 0 and not hidden
-            if let match = results.first(where: {
-                let sz = $0.size()
-                return sz != nil && sz!.width > 0 && sz!.height > 0 && $0.isHidden() != true
-            }) ?? results.first(where: { $0.isHidden() != true }) {
+            if let match = results.first {
                 found = match
                 break
             }
@@ -281,7 +276,6 @@ extension AccessibilityService {
                 var options = ElementSearchOptions()
                 options.maxDepth = 20
                 options.caseInsensitive = true
-                options.visibleOnly = true
                 if let role = role { options.includeRoles = [role] }
                 if let match = root.findElement(matching: title, options: options) {
                     found = match
@@ -301,21 +295,26 @@ extension AccessibilityService {
             Thread.sleep(forTimeInterval: 0.2)
         }
 
-        // Step 4: Press the element via AXorcist
+        // Step 4: Click — try AXorcist Element.click() first (handles centering),
+        // then AXPress, then InputDriver.click at coordinates
         do {
-            try element.performAction(.press)
+            try element.click()
             return successJSON(["message": "Clicked element", "element": elementProperties(element)])
         } catch {
-            // Fallback: click at center if element has a valid frame
-            if let frame = element.frame(), frame.width > 0, frame.height > 0 {
-                do {
-                    try InputDriver.click(at: CGPoint(x: frame.midX, y: frame.midY))
-                    return successJSON(["message": "Clicked at element center", "x": frame.midX, "y": frame.midY, "element": elementProperties(element)])
-                } catch {
-                    return errorJSON("Click failed: \(error.localizedDescription)")
+            // Element.click needs frame — try AXPress for menu items etc.
+            do {
+                try element.performAction(.press)
+                return successJSON(["message": "Pressed element", "element": elementProperties(element)])
+            } catch {
+                // Last resort: manual coordinate click
+                if let frame = element.frame(), frame.width > 0, frame.height > 0 {
+                    do {
+                        try InputDriver.click(at: CGPoint(x: frame.midX, y: frame.midY))
+                        return successJSON(["message": "Clicked at center", "x": frame.midX, "y": frame.midY, "element": elementProperties(element)])
+                    } catch {}
                 }
+                return errorJSON("All click methods failed for element: \(element.role() ?? "unknown")")
             }
-            return errorJSON("AXPress failed and element has no frame: \(error.localizedDescription)")
         }
     }
 
