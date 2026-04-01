@@ -1,0 +1,82 @@
+{
+  "": {
+    "swift-dependencies": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/AgentAccess.build/primary.swiftdeps"
+  },
+  "/private/tmp/AgentAccess/Sources/AgentAccess/AccessibilityConstants.swift": {
+    "dependencies": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/AgentAccess.build/AccessibilityConstants.d",
+    "object": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/AgentAccess.build/AccessibilityConstants.swift.o",
+    "swiftmodule": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/AgentAccess.build/AccessibilityConstants~partial.swiftmodule",
+    "swift-dependencies": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/AgentAccess.build/AccessibilityConstants.swiftdeps",
+    "diagnostics": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/AgentAccess.build/AccessibilityConstants.dia"
+  },
+  "/private/tmp/AgentAccess/Sources/AgentAccess/AccessibilityIDs.swift": {
+    "dependencies": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/AgentAccess.build/AccessibilityIDs.d",
+    "object": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/AgentAccess.build/AccessibilityIDs.swift.o",
+    "swiftmodule": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/AgentAccess.build/AccessibilityIDs~partial.swiftmodule",
+    "swift-dependencies": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/AgentAccess.build/AccessibilityIDs.swiftdeps",
+    "diagnostics": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/AgentAccess.build/AccessibilityIDs.dia"
+  },
+  "/private/tmp/AgentAccess/Sources/AgentAccess/AccessibilityPermissions.swift": {
+    "dependencies": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/AgentAccess.build/AccessibilityPermissions.d",
+    "object": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/AgentAccess.build/AccessibilityPermissions.swift.o",
+    "swiftmodule": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/AgentAccess.build/AccessibilityPermissions~partial.swiftmodule",
+    "swift-dependencies": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/AgentAccess.build/AccessibilityPermissions.swiftdeps",
+    "diagnostics": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/AgentAccess.build/AccessibilityPermissions.dia"
+  },
+  "/private/tmp/AgentAccess/Sources/AgentAccess/AccessibilityService+AXorcist.swift": {
+    "dependencies": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/AgentAccess.build/AccessibilityService+AXorcist.d",
+    "object": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/AgentAccess.build/AccessibilityService+AXorcist.swift.o",
+    "swiftmodule": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/AgentAccess.build/AccessibilityService+AXorcist~partial.swiftmodule",
+    "swift-dependencies": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/AgentAccess.build/AccessibilityService+AXorcist.swiftdeps",
+    "diagnostics": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/AgentAccess.build/AccessibilityService+AXorcist.dia"
+  },
+  "/private/tmp/AgentAccess/Sources/AgentAccess/AccessibilityService+Actions.swift": {
+    "dependencies": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/AgentAccess.build/AccessibilityService+Actions.d",
+    "object": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/AgentAccess.build/AccessibilityService+Actions.swift.o",
+    "swiftmodule": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/AgentAccess.build/AccessibilityService+Actions~partial.swiftmodule",
+    "swift-dependencies": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/AgentAccess.build/AccessibilityService+Actions.swiftdeps",
+    "diagnostics": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/AgentAccess.build/AccessibilityService+Actions.dia"
+  },
+  "/private/tmp/AgentAccess/Sources/AgentAccess/AccessibilityService+Elements.swift": {
+    "dependencies": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/AgentAccess.build/AccessibilityService+Elements.d",
+    "object": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/AgentAccess.build/AccessibilityService+Elements.swift.o",
+    "swiftmodule": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/AgentAccess.build/AccessibilityService+Elements~partial.swiftmodule",
+    "swift-dependencies": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/AgentAccess.build/AccessibilityService+Elements.swiftdeps",
+    "diagnostics": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/AgentAccess.build/AccessibilityService+Elements.dia"
+  },
+  "/private/tmp/AgentAccess/Sources/AgentAccess/AccessibilityService+Interaction.swift": {
+    "dependencies": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/AgentAccess.build/AccessibilityService+Interaction.d",
+    "object": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/AgentAccess.build/AccessibilityService+Interaction.swift.o",
+    "swiftmodule": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/AgentAccess.build/AccessibilityService+Interaction~partial.swiftmodule",
+    "swift-dependencies": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/AgentAccess.build/AccessibilityService+Interaction.swiftdeps",
+    "diagnostics": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/AgentAccess.build/AccessibilityService+Interaction.dia"
+  },
+  "/private/tmp/AgentAccess/Sources/AgentAccess/AccessibilityService+Screenshot.swift": {
+    "dependencies": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/AgentAccess.build/AccessibilityService+Screenshot.d",
+    "object": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/AgentAccess.build/AccessibilityService+Screenshot.swift.o",
+    "swiftmodule": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/AgentAccess.build/AccessibilityService+Screenshot~partial.swiftmodule",
+    "swift-dependencies": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/AgentAccess.build/AccessibilityService+Screenshot.swiftdeps",
+    "diagnostics": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/AgentAccess.build/AccessibilityService+Screenshot.dia"
+  },
+  "/private/tmp/AgentAccess/Sources/AgentAccess/AccessibilityService+Security.swift": {
+    "dependencies": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/AgentAccess.build/AccessibilityService+Security.d",
+    "object": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/AgentAccess.build/AccessibilityService+Security.swift.o",
+    "swiftmodule": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/AgentAccess.build/AccessibilityService+Security~partial.swiftmodule",
+    "swift-dependencies": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/AgentAccess.build/AccessibilityService+Security.swiftdeps",
+    "diagnostics": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/AgentAccess.build/AccessibilityService+Security.dia"
+  },
+  "/private/tmp/AgentAccess/Sources/AgentAccess/AccessibilityService+Window.swift": {
+    "dependencies": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/AgentAccess.build/AccessibilityService+Window.d",
+    "object": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/AgentAccess.build/AccessibilityService+Window.swift.o",
+    "swiftmodule": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/AgentAccess.build/AccessibilityService+Window~partial.swiftmodule",
+    "swift-dependencies": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/AgentAccess.build/AccessibilityService+Window.swiftdeps",
+    "diagnostics": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/AgentAccess.build/AccessibilityService+Window.dia"
+  },
+  "/private/tmp/AgentAccess/Sources/AgentAccess/AccessibilityService.swift": {
+    "dependencies": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/AgentAccess.build/AccessibilityService.d",
+    "object": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/AgentAccess.build/AccessibilityService.swift.o",
+    "swiftmodule": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/AgentAccess.build/AccessibilityService~partial.swiftmodule",
+    "swift-dependencies": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/AgentAccess.build/AccessibilityService.swiftdeps",
+    "diagnostics": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/AgentAccess.build/AccessibilityService.dia"
+  }
+}

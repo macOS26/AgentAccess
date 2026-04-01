@@ -267,7 +267,8 @@ extension AccessibilityService {
         while Date().timeIntervalSince(startTime) < timeout {
             // Use AXorcist Element.findElements to search by role/title/value
             let results = root.findElements(role: role, title: title, label: nil, value: value, identifier: nil, maxDepth: 20)
-            if let match = results.first {
+            // Prefer elements with actual size (skip hidden menu items with 0x0)
+            if let match = results.first(where: { ($0.size()?.width ?? 0) > 0 }) ?? results.first {
                 found = match
                 break
             }

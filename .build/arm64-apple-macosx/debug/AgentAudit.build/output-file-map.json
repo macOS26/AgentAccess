@@ -1,0 +1,12 @@
+{
+  "": {
+    "swift-dependencies": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/AgentAudit.build/primary.swiftdeps"
+  },
+  "/private/tmp/AgentAccess/.build/checkouts/AgentAudit/Sources/AgentAudit/AgentAudit.swift": {
+    "dependencies": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/AgentAudit.build/AgentAudit.d",
+    "object": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/AgentAudit.build/AgentAudit.swift.o",
+    "swiftmodule": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/AgentAudit.build/AgentAudit~partial.swiftmodule",
+    "swift-dependencies": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/AgentAudit.build/AgentAudit.swiftdeps",
+    "diagnostics": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/AgentAudit.build/AgentAudit.dia"
+  }
+}

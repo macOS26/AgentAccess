@@ -1,0 +1,68 @@
+{
+  "": {
+    "swift-dependencies": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/Commander.build/primary.swiftdeps"
+  },
+  "/private/tmp/AgentAccess/.build/checkouts/Commander/Sources/Commander/CommandSignature.swift": {
+    "dependencies": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/Commander.build/CommandSignature.d",
+    "object": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/Commander.build/CommandSignature.swift.o",
+    "swiftmodule": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/Commander.build/CommandSignature~partial.swiftmodule",
+    "swift-dependencies": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/Commander.build/CommandSignature.swiftdeps",
+    "diagnostics": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/Commander.build/CommandSignature.dia"
+  },
+  "/private/tmp/AgentAccess/.build/checkouts/Commander/Sources/Commander/Errors.swift": {
+    "dependencies": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/Commander.build/Errors.d",
+    "object": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/Commander.build/Errors.swift.o",
+    "swiftmodule": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/Commander.build/Errors~partial.swiftmodule",
+    "swift-dependencies": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/Commander.build/Errors.swiftdeps",
+    "diagnostics": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/Commander.build/Errors.dia"
+  },
+  "/private/tmp/AgentAccess/.build/checkouts/Commander/Sources/Commander/ExpressibleFromArgument.swift": {
+    "dependencies": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/Commander.build/ExpressibleFromArgument.d",
+    "object": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/Commander.build/ExpressibleFromArgument.swift.o",
+    "swiftmodule": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/Commander.build/ExpressibleFromArgument~partial.swiftmodule",
+    "swift-dependencies": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/Commander.build/ExpressibleFromArgument.swiftdeps",
+    "diagnostics": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/Commander.build/ExpressibleFromArgument.dia"
+  },
+  "/private/tmp/AgentAccess/.build/checkouts/Commander/Sources/Commander/NameSpecification.swift": {
+    "dependencies": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/Commander.build/NameSpecification.d",
+    "object": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/Commander.build/NameSpecification.swift.o",
+    "swiftmodule": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/Commander.build/NameSpecification~partial.swiftmodule",
+    "swift-dependencies": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/Commander.build/NameSpecification.swiftdeps",
+    "diagnostics": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/Commander.build/NameSpecification.dia"
+  },
+  "/private/tmp/AgentAccess/.build/checkouts/Commander/Sources/Commander/ParsableCommand.swift": {
+    "dependencies": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/Commander.build/ParsableCommand.d",
+    "object": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/Commander.build/ParsableCommand.swift.o",
+    "swiftmodule": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/Commander.build/ParsableCommand~partial.swiftmodule",
+    "swift-dependencies": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/Commander.build/ParsableCommand.swiftdeps",
+    "diagnostics": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/Commander.build/ParsableCommand.dia"
+  },
+  "/private/tmp/AgentAccess/.build/checkouts/Commander/Sources/Commander/Parser/CommandParser.swift": {
+    "dependencies": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/Commander.build/CommandParser.d",
+    "object": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/Commander.build/CommandParser.swift.o",
+    "swiftmodule": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/Commander.build/CommandParser~partial.swiftmodule",
+    "swift-dependencies": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/Commander.build/CommandParser.swiftdeps",
+    "diagnostics": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/Commander.build/CommandParser.dia"
+  },
+  "/private/tmp/AgentAccess/.build/checkouts/Commander/Sources/Commander/Parser/Tokenizer.swift": {
+    "dependencies": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/Commander.build/Tokenizer.d",
+    "object": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/Commander.build/Tokenizer.swift.o",
+    "swiftmodule": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/Commander.build/Tokenizer~partial.swiftmodule",
+    "swift-dependencies": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/Commander.build/Tokenizer.swiftdeps",
+    "diagnostics": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/Commander.build/Tokenizer.dia"
+  },
+  "/private/tmp/AgentAccess/.build/checkouts/Commander/Sources/Commander/Program.swift": {
+    "dependencies": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/Commander.build/Program.d",
+    "object": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/Commander.build/Program.swift.o",
+    "swiftmodule": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/Commander.build/Program~partial.swiftmodule",
+    "swift-dependencies": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/Commander.build/Program.swiftdeps",
+    "diagnostics": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/Commander.build/Program.dia"
+  },
+  "/private/tmp/AgentAccess/.build/checkouts/Commander/Sources/Commander/PropertyWrappers.swift": {
+    "dependencies": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/Commander.build/PropertyWrappers.d",
+    "object": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/Commander.build/PropertyWrappers.swift.o",
+    "swiftmodule": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/Commander.build/PropertyWrappers~partial.swiftmodule",
+    "swift-dependencies": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/Commander.build/PropertyWrappers.swiftdeps",
+    "diagnostics": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/Commander.build/PropertyWrappers.dia"
+  }
+}

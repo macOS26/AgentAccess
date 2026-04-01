@@ -1,0 +1,81 @@
+{
+  "object" : {
+    "artifacts" : [
+
+    ],
+    "dependencies" : [
+      {
+        "basedOn" : null,
+        "packageRef" : {
+          "identity" : "agentaudit",
+          "kind" : "remoteSourceControl",
+          "location" : "https://github.com/macOS26/AgentAudit.git",
+          "name" : "AgentAudit"
+        },
+        "state" : {
+          "checkoutState" : {
+            "revision" : "cc777ea0867837c55586c627508cbe37c672a7e7",
+            "version" : "1.0.0"
+          },
+          "name" : "sourceControlCheckout"
+        },
+        "subpath" : "AgentAudit"
+      },
+      {
+        "basedOn" : null,
+        "packageRef" : {
+          "identity" : "axorcist",
+          "kind" : "remoteSourceControl",
+          "location" : "https://github.com/steipete/AXorcist.git",
+          "name" : "AXorcist"
+        },
+        "state" : {
+          "checkoutState" : {
+            "revision" : "c75d06f7f93e264a9786edc2b78c04973061cb2f",
+            "version" : "0.1.0"
+          },
+          "name" : "sourceControlCheckout"
+        },
+        "subpath" : "AXorcist"
+      },
+      {
+        "basedOn" : null,
+        "packageRef" : {
+          "identity" : "commander",
+          "kind" : "remoteSourceControl",
+          "location" : "https://github.com/steipete/Commander.git",
+          "name" : "Commander"
+        },
+        "state" : {
+          "checkoutState" : {
+            "revision" : "9e349575c8e3c6745e81fe19e5bb5efa01b078ce",
+            "version" : "0.2.1"
+          },
+          "name" : "sourceControlCheckout"
+        },
+        "subpath" : "Commander"
+      },
+      {
+        "basedOn" : null,
+        "packageRef" : {
+          "identity" : "swift-log",
+          "kind" : "remoteSourceControl",
+          "location" : "https://github.com/apple/swift-log.git",
+          "name" : "swift-log"
+        },
+        "state" : {
+          "checkoutState" : {
+            "revision" : "8c0f217f01000dd30f60d6e536569ad4e74291f9",
+            "version" : "1.11.0"
+          },
+          "name" : "sourceControlCheckout"
+        },
+        "subpath" : "swift-log"
+      }
+    ],
+    "prebuilts" : [
+
+    ]
+  },
+  "version" : 7
+}

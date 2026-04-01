@@ -1,0 +1,12 @@
+{
+  "": {
+    "swift-dependencies": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/InMemoryLogging.build/primary.swiftdeps"
+  },
+  "/private/tmp/AgentAccess/.build/checkouts/swift-log/Sources/InMemoryLogging/InMemoryLogHandler.swift": {
+    "dependencies": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/InMemoryLogging.build/InMemoryLogHandler.d",
+    "object": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/InMemoryLogging.build/InMemoryLogHandler.swift.o",
+    "swiftmodule": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/InMemoryLogging.build/InMemoryLogHandler~partial.swiftmodule",
+    "swift-dependencies": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/InMemoryLogging.build/InMemoryLogHandler.swiftdeps",
+    "diagnostics": "/private/tmp/AgentAccess/.build/arm64-apple-macosx/debug/InMemoryLogging.build/InMemoryLogHandler.dia"
+  }
+}
