@@ -68,7 +68,7 @@ public final class AccessibilityService: @unchecked Sendable {
             guard let windowID = window[CFConstants.cgWindowNumber] as? Int,
                   let ownerPID = window[CFConstants.cgWindowOwnerPID] as? Int32,
                   let layer = window[kCGWindowLayer as String] as? Int,
-                  layer >= 0 else { continue }
+                  layer == 0 else { continue }  // Only app windows (skip Control Center, menubar, etc.)
 
             let ownerName = window[CFConstants.cgWindowName] as? String ?? ""
             let windowName = window[CFConstants.cgWindowName] as? String ?? ""
