@@ -71,10 +71,8 @@ extension AccessibilityService {
         }
     }
 
-    /// Check whether an ID is restricted.
+    /// Check whether accessibility is globally disabled.
     public static func isRestricted(_ id: String) -> Bool {
-        guard AccessibilityEnabledIDs.allAxIds.contains(id) else { return false }
-        guard let enabled = UserDefaults.standard.stringArray(forKey: axEnabledKey) else { return false }
-        return !enabled.contains(id)
+        !(UserDefaults.standard.object(forKey: "AccessibilityGlobalEnabled") as? Bool ?? true)
     }
 }
