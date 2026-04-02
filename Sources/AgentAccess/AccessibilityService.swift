@@ -309,9 +309,17 @@ public final class AccessibilityService: @unchecked Sendable {
         }
         // Always activate — handles minimized/docked apps
         if let app = RunningApplicationHelper.applications(withBundleIdentifier: bundleId).first {
-            if let appElement = Element.application(for: app) {
+            // Unminimize any minimized windows first
+            if let appElement = Element.application(for: app),
+               let windows = appElement.windows() {
+                for window in windows {
+                    if window.isMinimized() == true {
+                        _ = window.unminimizeWindow()
+                    }
+                }
                 _ = appElement.activate()
             }
+            // NSRunningApplication.activate as fallback — works for docked apps
             app.activate()
             Thread.sleep(forTimeInterval: 0.3)
         }
