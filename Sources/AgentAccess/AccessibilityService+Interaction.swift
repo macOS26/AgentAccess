@@ -261,13 +261,12 @@ extension AccessibilityService {
             return errorJSON("Could not get app element for \(appBundleId ?? "frontmost")")
         }
 
-        // Step 2: Search the app's element tree for the target element
+        // Step 2: Search with exponential backoff (0.1s → 0.2s → 0.4s → 0.8s → 1.0s max)
         var found: Element?
         let startTime = Date()
+        var retryDelay: TimeInterval = 0.1
         while Date().timeIntervalSince(startTime) < timeout {
-            // Use AXorcist Element.findElements to search by role/title/value
             let results = root.findElements(role: role, title: title, label: nil, value: value, identifier: nil, maxDepth: 20)
-            // Prefer elements with actual size (skip hidden menu items with 0x0)
             if let match = results.first(where: { ($0.size()?.width ?? 0) > 0 }) ?? results.first {
                 found = match
                 break
@@ -283,7 +282,8 @@ extension AccessibilityService {
                     break
                 }
             }
-            Thread.sleep(forTimeInterval: 0.3)
+            Thread.sleep(forTimeInterval: retryDelay)
+            retryDelay = min(retryDelay * 2, 1.0)
         }
 
         guard let element = found else {
