@@ -100,7 +100,7 @@ extension AccessibilityService {
         if element.isInteractive() {
             let sz = element.size()
             // Only include elements with actual size (visible on screen)
-            if sz != nil && sz!.width > 0 && sz!.height > 0 {
+            if let sz = sz, sz.width > 0, sz.height > 0 {
                 var info = elementProperties(element)
                 if let name = element.computedName() { info["computedName"] = name }
                 results.append(info)

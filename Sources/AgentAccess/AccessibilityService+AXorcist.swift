@@ -277,8 +277,10 @@ extension AccessibilityService {
         let axCriteria = criteria?.map { c in
             Criterion(attribute: c.attribute, value: c.value, matchType: parseMatchType(c.matchType))
         }
-        let locator: Locator? = axCriteria != nil ? Locator(matchAll: true, criteria: axCriteria!) : nil
-        let axNotification = AXNotification(rawValue: notificationName) ?? AXNotification(rawValue: "AXValueChanged")!
+        let locator: Locator? = axCriteria.map { Locator(matchAll: true, criteria: $0) }
+        guard let axNotification = AXNotification(rawValue: notificationName) ?? AXNotification(rawValue: "AXValueChanged") else {
+            return errorJSON("Invalid notification name: \(notificationName)")
+        }
         let cmd = ObserveCommand(
             appIdentifier: appIdentifier,
             locator: locator,
