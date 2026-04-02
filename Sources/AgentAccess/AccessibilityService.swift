@@ -76,10 +76,8 @@ public final class AccessibilityService: @unchecked Sendable {
 
             var windowInfo: [String: Any] = [:]
             windowInfo["windowId"] = windowID
-            windowInfo["ownerPID"] = Int(ownerPID)
             windowInfo["ownerName"] = appName
             windowInfo["windowName"] = windowName
-            windowInfo["layer"] = layer
 
             var boundsInfo: [String: CGFloat] = [:]
             if let bounds = window[CFConstants.cgWindowBounds] as? [String: CGFloat] {
@@ -300,14 +298,22 @@ public final class AccessibilityService: @unchecked Sendable {
         return input
     }
 
-    /// Launch app if not already running, then wait briefly for it to start.
+    /// Launch app if not running, then activate (bring to front) regardless.
     @MainActor
     private func launchIfNeeded(bundleId: String) {
         if RunningApplicationHelper.applications(withBundleIdentifier: bundleId).isEmpty {
             if let url = NSWorkspace.shared.urlForApplication(withBundleIdentifier: bundleId) {
                 NSWorkspace.shared.openApplication(at: url, configuration: NSWorkspace.OpenConfiguration())
-                Thread.sleep(forTimeInterval: 1.0)  // Wait for app to start
+                Thread.sleep(forTimeInterval: 1.0)
             }
+        }
+        // Always activate — handles minimized/docked apps
+        if let app = RunningApplicationHelper.applications(withBundleIdentifier: bundleId).first {
+            if let appElement = Element.application(for: app) {
+                _ = appElement.activate()
+            }
+            app.activate()
+            Thread.sleep(forTimeInterval: 0.3)
         }
     }
 
