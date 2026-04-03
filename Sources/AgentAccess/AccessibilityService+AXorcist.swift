@@ -489,6 +489,24 @@ extension AccessibilityService {
         return axResponseToJSON(response)
     }
 
+    // MARK: - App at Point (AXorcist AppLocator)
+
+    /// Find the app under a screen coordinate using AXorcist's AppLocator.
+    @MainActor
+    public func appAtPoint(x: CGFloat, y: CGFloat) -> String {
+        guard Self.hasAccessibilityPermission() else {
+            return errorJSON("Accessibility permission required.")
+        }
+        if let app = AppLocator.app(at: CGPoint(x: x, y: y)) {
+            return successJSON([
+                "name": app.localizedName ?? "Unknown",
+                "bundleId": app.bundleIdentifier ?? "unknown",
+                "pid": Int(app.processIdentifier)
+            ])
+        }
+        return errorJSON("No app found at (\(x), \(y))")
+    }
+
     // MARK: - Helpers
 
     @MainActor

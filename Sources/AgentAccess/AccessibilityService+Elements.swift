@@ -42,12 +42,12 @@ extension AccessibilityService {
         return successJSON(elementProperties(found))
     }
 
-    // MARK: - Get All Properties (legacy compatibility)
+    // MARK: - Get All Properties
 
+    /// Get properties from an AXorcist Element directly.
     @MainActor
-    public func getAllProperties(_ element: AXUIElement) -> [String: Any] {
-        let wrapped = Element(element)
-        return elementProperties(wrapped)
+    public func getAllProperties(_ element: Element) -> [String: Any] {
+        return elementProperties(element)
     }
 
     // MARK: - Open App and Get Elements

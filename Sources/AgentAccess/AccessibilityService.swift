@@ -145,7 +145,7 @@ public final class AccessibilityService: @unchecked Sendable {
 
     /// Search within an Element hierarchy using AXorcist's flexible matching.
     @MainActor
-    private func searchInElement(_ root: Element, role: String?, title: String?, value: String?) -> Element? {
+    func searchInElement(_ root: Element, role: String?, title: String?, value: String?) -> Element? {
         // Use AXorcist's findElements for multi-criteria search
         let results = root.findElements(
             role: role,

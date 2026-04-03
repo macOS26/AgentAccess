@@ -290,9 +290,9 @@ extension AccessibilityService {
             return errorJSON("Element not found in \(appBundleId ?? "frontmost app"): role=\(role ?? "any"), title=\(title ?? "any")")
         }
 
-        // Step 3: Wait for element to be enabled
-        let enableStart = Date()
-        while element.isEnabled() == false, Date().timeIntervalSince(enableStart) < 5.0 {
+        // Step 3: Wait for element to be actionable (enabled, visible, on screen)
+        let actionableStart = Date()
+        while !element.isActionable(), Date().timeIntervalSince(actionableStart) < 5.0 {
             Thread.sleep(forTimeInterval: 0.2)
         }
 
@@ -392,9 +392,9 @@ extension AccessibilityService {
             return successJSON(["message": "Text set via AXValue", "method": "element_setValue", "text_length": text.count])
         }
 
-        // AXorcist: fallback to Element.typeText (clicks to focus + types)
+        // AXorcist: fallback to Element.typeText with clearFirst via Element.clearField()
         do {
-            try found.typeText(text)
+            try found.typeText(text, clearFirst: true)
             return successJSON(["message": "Typed \(text.count) characters", "method": "element_typeText", "text_length": text.count])
         } catch {
             return errorJSON("Type failed: \(error.localizedDescription)")
@@ -403,15 +403,17 @@ extension AccessibilityService {
 
     // MARK: - Legacy Compatibility (return AXorcist Element.underlyingElement)
 
+    /// Find element in app — returns AXorcist Element
     @MainActor
-    public func findElementInApp(pid: pid_t, role: String?, title: String?, value: String?) -> AXUIElement? {
+    public func findElementInApp(pid: pid_t, role: String?, title: String?, value: String?) -> Element? {
         guard let appElement = Element.application(for: pid) else { return nil }
-        return searchInElementLegacy(appElement, role: role, title: title, value: value)?.underlyingElement
+        return searchInElement(appElement, role: role, title: title, value: value)
     }
 
+    /// Find element globally — returns AXorcist Element
     @MainActor
-    public func findElementGlobally(role: String?, title: String?, value: String?) -> AXUIElement? {
-        return findAXElement(role: role, title: title, value: value, appBundleId: nil)?.underlyingElement
+    public func findElementGlobally(role: String?, title: String?, value: String?) -> Element? {
+        return findAXElement(role: role, title: title, value: value, appBundleId: nil)
     }
 
     @MainActor
