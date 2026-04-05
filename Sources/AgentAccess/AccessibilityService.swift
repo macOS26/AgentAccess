@@ -170,32 +170,29 @@ public final class AccessibilityService: @unchecked Sendable {
     }
 
     /// Convert an AXorcist Element's properties to a dictionary for JSON output.
+    /// Uses standard AX* key names that LLMs recognize from training data.
     @MainActor
-    /// Compact element properties — short keys, skip false/empty values to save tokens.
     public func elementProperties(_ element: Element) -> [String: Any] {
         var result: [String: Any] = [:]
-        if let role = element.role() { result["role"] = role }
-        if let title = element.title() { result["title"] = title }
-        if let desc = element.descriptionText() { result["desc"] = desc }
-        if let roleDesc = element.roleDescription() { result["roleDesc"] = roleDesc }
-        if let sub = element.subrole() { result["subrole"] = sub }
-        if let ident = element.identifier() { result["id"] = ident }
-        if let help = element.help() { result["help"] = help }
-        // Only include true state values — skip false (default)
-        if element.isEnabled() == true { result["enabled"] = true }
-        if element.isEnabled() == false { result["enabled"] = false }  // disabled is important
-        if element.isFocused() == true { result["focused"] = true }
-        // Skip hidden=false (most elements), only include hidden=true
-        if element.isHidden() == true { result["hidden"] = true }
-        if let pos = element.position() { result["pos"] = [Int(pos.x), Int(pos.y)] }
-        if let sz = element.size() { result["size"] = [Int(sz.width), Int(sz.height)] }
+        if let role = element.role() { result["AXRole"] = role }
+        if let title = element.title() { result["AXTitle"] = title }
+        if let desc = element.descriptionText() { result["AXDescription"] = desc }
+        if let roleDesc = element.roleDescription() { result["AXRoleDescription"] = roleDesc }
+        if let sub = element.subrole() { result["AXSubrole"] = sub }
+        if let ident = element.identifier() { result["AXIdentifier"] = ident }
+        if let help = element.help() { result["AXHelp"] = help }
+        if let enabled = element.isEnabled() { result["AXEnabled"] = enabled }
+        if let focused = element.isFocused() { result["AXFocused"] = focused }
+        if let hidden = element.isHidden() { result["AXHidden"] = hidden }
+        if let pos = element.position() { result["AXPosition"] = ["x": pos.x, "y": pos.y] }
+        if let sz = element.size() { result["AXSize"] = ["width": sz.width, "height": sz.height] }
         if let val = element.value() {
-            if let s = val as? String { result["value"] = s }
-            else if let n = val as? NSNumber { result["value"] = n }
-            else { result["value"] = String(describing: val) }
+            if let s = val as? String { result["AXValue"] = s }
+            else if let n = val as? NSNumber { result["AXValue"] = n }
+            else { result["AXValue"] = String(describing: val) }
         }
-        if let url = element.url() { result["url"] = url.absoluteString }
-        if let placeholder = element.placeholderValue() { result["placeholder"] = placeholder }
+        if let url = element.url() { result["AXURL"] = url.absoluteString }
+        if let placeholder = element.placeholderValue() { result["AXPlaceholderValue"] = placeholder }
         return result
     }
 
