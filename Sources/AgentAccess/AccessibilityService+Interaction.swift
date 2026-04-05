@@ -290,9 +290,9 @@ extension AccessibilityService {
             return errorJSON("Element not found in \(appBundleId ?? "frontmost app"): role=\(role ?? "any"), title=\(title ?? "any")")
         }
 
-        // Step 3: Wait for element to be actionable (enabled, visible, on screen)
-        let actionableStart = Date()
-        while !element.isActionable(), Date().timeIntervalSince(actionableStart) < 5.0 {
+        // Step 3: Wait for element to be enabled
+        let enableStart = Date()
+        while element.isEnabled() == false, Date().timeIntervalSince(enableStart) < 5.0 {
             Thread.sleep(forTimeInterval: 0.2)
         }
 
