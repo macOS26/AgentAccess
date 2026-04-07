@@ -6,9 +6,15 @@ import AppKit
 extension AccessibilityService {
     // MARK: - Perform Actions
 
+    /// Perform an AX action on an element identified by role/title/value/appBundleId.
+    /// Coordinate-based dispatch is intentionally absent — every action must go
+    /// through AXorcist's element-finding so it can be reliably retargeted when
+    /// the UI shifts. If you need to perform an action 'somewhere on screen',
+    /// find the element first via find_element / inspect_element and pass its
+    /// role+title to this method.
     @MainActor
     public func performAction(role: String?, title: String?, value: String?, appBundleId: String?, x: CGFloat?, y: CGFloat?, action: String) -> String {
-        if Self.isBrowser(appBundleId) || (appBundleId == nil && x == nil && Self.frontmostAppIsBrowser()) {
+        if Self.isBrowser(appBundleId) || (appBundleId == nil && Self.frontmostAppIsBrowser()) {
             return Self.safariPageInfo()
         }
         guard Self.hasAccessibilityPermission() else {
@@ -19,6 +25,11 @@ extension AccessibilityService {
         if Self.isRestricted(action) {
             return errorJSON("Action '\(action)' is disabled in Accessibility Settings. Enable it in Settings to allow this action.")
         }
+
+        // Coordinate paths are NOT supported. x/y are accepted in the signature
+        // for source compatibility but ignored — the LLM must identify elements
+        // by role/title/value, not by screen position.
+        _ = x; _ = y
 
         // Resolve app name → bundle ID
         let appBundleId = resolveBundleId(appBundleId)
@@ -31,29 +42,13 @@ extension AccessibilityService {
             Thread.sleep(forTimeInterval: 0.1)
         }
 
-        // If coordinates given, use AXorcist Element.elementAtPoint + performAction
-        if let x = x, let y = y {
-            guard let found = Element.elementAtPoint(CGPoint(x: x, y: y)) else {
-                return errorJSON("No element at (\(x), \(y))")
-            }
-            if let elRole = found.role(), Self.isRestricted(elRole) {
-                return errorJSON("Cannot interact with \(elRole) — disabled in Accessibility Access")
-            }
-            do {
-                try found.performAction(action)
-                return successJSON(["message": "Action '\(action)' performed"])
-            } catch {
-                return errorJSON("Action failed: \(error.localizedDescription)")
-            }
-        }
-
         // Use AXorcist PerformActionCommand — atomic find + action
         var criteria: [Criterion] = []
         if let role = role { criteria.append(Criterion(attribute: "AXRole", value: role)) }
         if let value = value { criteria.append(Criterion(attribute: "AXValue", value: value, matchType: .contains)) }
 
         if criteria.isEmpty && title == nil {
-            return errorJSON("No search criteria — provide role, title, value, or coordinates")
+            return errorJSON("No search criteria — provide role, title, or value. Coordinate-based actions are disabled; find_element first if you need to locate something on screen.")
         }
 
         // Use computedNameContains for title — searches AXTitle + AXDescription + AXHelp
@@ -70,88 +65,17 @@ extension AccessibilityService {
         }
     }
 
-    // MARK: - Input Simulation via AXorcist InputDriver
-
-    @MainActor
-    public func typeText(_ text: String, at x: CGFloat? = nil, y: CGFloat? = nil) -> String {
-        guard Self.hasAccessibilityPermission() else {
-            return errorJSON("Accessibility permission required.")
-        }
-        AuditLog.log(.accessibility, "typeText(\(text.count) chars) at x: \(x.map(String.init) ?? "nil"), y: \(y.map(String.init) ?? "nil")")
-
-        // If coordinates provided, click first to focus
-        if let x = x, let y = y {
-            do {
-                try InputDriver.click(at: CGPoint(x: x, y: y))
-                Thread.sleep(forTimeInterval: 0.1)
-            } catch {
-                return errorJSON("Click failed: \(error.localizedDescription)")
-            }
-        }
-
-        do {
-            try InputDriver.type(text)
-            return successJSON(["message": "Typed \(text.count) characters"])
-        } catch {
-            return errorJSON("Type failed: \(error.localizedDescription)")
-        }
-    }
-
-    @MainActor
-    public func clickAt(x: CGFloat, y: CGFloat, button: String = "left", clicks: Int = 1) -> String {
-        guard Self.hasAccessibilityPermission() else {
-            return errorJSON("Accessibility permission required.")
-        }
-        AuditLog.log(.accessibility, "clickAt(x: \(x), y: \(y), button: \(button), clicks: \(clicks))")
-
-        let mouseButton: MouseButton
-        switch button.lowercased() {
-        case "right": mouseButton = .right
-        case "middle": mouseButton = .middle
-        default: mouseButton = .left
-        }
-
-        do {
-            try InputDriver.click(at: CGPoint(x: x, y: y), button: mouseButton, count: clicks)
-            return successJSON([
-                "message": "\(clicks == 2 ? "Double-" : "")\(button) click at (\(x), \(y))",
-                "x": x, "y": y, "button": button, "clicks": clicks
-            ])
-        } catch {
-            return errorJSON("Click failed: \(error.localizedDescription)")
-        }
-    }
-
-    @MainActor
-    public func scrollAt(x: CGFloat, y: CGFloat, deltaX: Int, deltaY: Int) -> String {
-        guard Self.hasAccessibilityPermission() else {
-            return errorJSON("Accessibility permission required.")
-        }
-        AuditLog.log(.accessibility, "scrollAt(x: \(x), y: \(y), deltaX: \(deltaX), deltaY: \(deltaY))")
-
-        do {
-            try InputDriver.scroll(deltaX: Double(deltaX), deltaY: Double(deltaY), at: CGPoint(x: x, y: y))
-            return successJSON([
-                "message": "Scrolled (\(deltaX), \(deltaY)) at (\(x), \(y))",
-                "x": x, "y": y, "deltaX": deltaX, "deltaY": deltaY
-            ])
-        } catch {
-            return errorJSON("Scroll failed: \(error.localizedDescription)")
-        }
-    }
-
-    @MainActor
-    public func pressKey(virtualKey: UInt16, modifiers: [String] = []) -> String {
-        guard Self.hasAccessibilityPermission() else {
-            return errorJSON("Accessibility permission required.")
-        }
-        AuditLog.log(.accessibility, "pressKey(\(virtualKey), modifiers: \(modifiers))")
-
-        do {
-            try InputDriver.hotkey(keys: modifiers + [String(virtualKey)], holdDuration: 0.1)
-            return successJSON(["message": "Pressed key code \(virtualKey) with modifiers: \(modifiers)"])
-        } catch {
-            return errorJSON("Key press failed: \(error.localizedDescription)")
-        }
-    }
+    // MARK: - Coordinate-based input (REMOVED)
+    //
+    // typeText(_:at:y:), clickAt(x:y:button:clicks:), scrollAt(x:y:deltaX:deltaY:),
+    // and pressKey(virtualKey:modifiers:) all used InputDriver to send raw CGEvents
+    // at screen coordinates. They were unreliable (window positions shift, retina
+    // scaling, multi-display setups) and bypassed AXorcist entirely. Removed.
+    //
+    // Use these AXorcist-based replacements instead:
+    //   - clickAt(x:y:...)         → clickElement(role:title:appBundleId:)
+    //   - typeText(_:at:y:)        → typeTextIntoElement(role:title:text:appBundleId:)
+    //   - scrollAt(x:y:...)        → scrollToElement(role:title:appBundleId:)
+    //   - pressKey(virtualKey:...) → clickElement on the relevant button, or
+    //                                clickMenuItem for keyboard shortcuts
 }

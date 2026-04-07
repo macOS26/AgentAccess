@@ -263,6 +263,10 @@ extension AccessibilityService {
     // MARK: - Scroll to AX Element
 
     @MainActor
+    /// Scroll the app's main scroll area until the target element becomes findable.
+    /// AXorcist-only: walks the focused window for the first AXScrollArea and calls
+    /// `Element.scroll(direction:amount:)` on it. The old implementation drove a
+    /// scroll wheel via InputDriver at the window center; that's gone.
     public func scrollToElement(role: String?, title: String?, appBundleId: String?, maxScrolls: Int = 20) -> String {
         guard Self.hasAccessibilityPermission() else {
             return errorJSON("Accessibility permission required.")
@@ -273,7 +277,7 @@ extension AccessibilityService {
             return successJSON(["message": "Element already visible", "scrolls": 0])
         }
 
-        // Get window center for scroll
+        // Resolve the app element via AXorcist
         let appElement: Element?
         if let bundleId = appBundleId,
            let app = RunningApplicationHelper.applications(withBundleIdentifier: bundleId).first {
@@ -283,19 +287,23 @@ extension AccessibilityService {
         } else {
             return errorJSON("No app to scroll in")
         }
+        guard let root = appElement else {
+            return errorJSON("Could not get app element for \(appBundleId ?? "frontmost")")
+        }
 
-        var scrollX: CGFloat = 400
-        var scrollY: CGFloat = 400
-        if let root = appElement,
-           let appWindows = root.windows(),
-           let window = appWindows.first(where: { $0.role() == "AXWindow" }),
-           let frame = window.frame() {
-            scrollX = frame.midX
-            scrollY = frame.midY
+        // Find the first AXScrollArea inside any window — that's the AXorcist-native
+        // scroll target. If the app has no scroll area we can't scroll via accessibility.
+        let scrollAreas = root.findElements(role: "AXScrollArea", title: nil, label: nil, value: nil, identifier: nil, maxDepth: 10)
+        guard let scrollArea = scrollAreas.first else {
+            return errorJSON("No AXScrollArea found in \(appBundleId ?? "frontmost app"). The app may use a custom non-accessible scroll view.")
         }
 
         for i in 0..<maxScrolls {
-            _ = scrollAt(x: scrollX, y: scrollY, deltaX: 0, deltaY: -5)
+            do {
+                try scrollArea.scroll(direction: .down, amount: 5)
+            } catch {
+                return errorJSON("Element.scroll failed: \(error.localizedDescription)")
+            }
             Thread.sleep(forTimeInterval: 0.3)
             if findAXElement(role: role, title: title, value: nil, appBundleId: appBundleId) != nil {
                 return successJSON(["message": "Found element after scrolling", "scrolls": i + 1])

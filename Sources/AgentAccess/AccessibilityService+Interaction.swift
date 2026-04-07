@@ -139,23 +139,19 @@ extension AccessibilityService {
         return successJSON(["count": results.count, "children": results])
     }
 
-    // MARK: - Drag (AXorcist InputDriver)
-
-    @MainActor
-    public func drag(fromX: CGFloat, fromY: CGFloat, toX: CGFloat, toY: CGFloat, button: String = "left") -> String {
-        guard Self.hasAccessibilityPermission() else {
-            return errorJSON("Accessibility permission required.")
-        }
-        AuditLog.log(.accessibility, "drag(from: (\(fromX), \(fromY)), to: (\(toX), \(toY)), button: \(button))")
-
-        let mouseButton: MouseButton = button.lowercased() == "right" ? .right : .left
-        do {
-            try InputDriver.drag(from: CGPoint(x: fromX, y: fromY), to: CGPoint(x: toX, y: toY), button: mouseButton, steps: 10)
-            return successJSON(["message": "Dragged from (\(fromX), \(fromY)) to (\(toX), \(toY))", "fromX": fromX, "fromY": fromY, "toX": toX, "toY": toY, "button": button])
-        } catch {
-            return errorJSON("Drag failed: \(error.localizedDescription)")
-        }
-    }
+    // MARK: - Drag (REMOVED)
+    //
+    // drag(fromX:fromY:toX:toY:button:) used InputDriver to send raw CGEvents for
+    // arbitrary screen-coordinate drags. Removed because:
+    //   - Coordinates are unreliable across window moves and display scales
+    //   - No AXorcist equivalent exists for arbitrary drags
+    //   - Most legitimate drag use cases have an element-based alternative:
+    //       * Window move/resize  → setWindowFrame(appBundleId:x:y:width:height:)
+    //       * Slider value        → set_properties on AXSlider with new AXValue
+    //       * List reorder        → typically driven by menu items or buttons
+    //   - The few drags that have no AX equivalent (file-system drag-and-drop
+    //     between Finder and another app) just don't work via AX and should be
+    //     done with a Shortcut or AppleScript instead.
 
     // MARK: - Wait For Element
 
@@ -184,28 +180,30 @@ extension AccessibilityService {
 
     // MARK: - Show Menu
 
+    /// Show the context menu (or any AXShowMenu-supported menu) on an element
+    /// identified by role/title/value/appBundleId. AXorcist-only — no coordinate
+    /// fallback. If the element doesn't support AXShowMenu, the call returns an
+    /// error and the LLM should look for a different actionable element.
     @MainActor
     public func showMenu(role: String?, title: String?, value: String?, appBundleId: String?, x: CGFloat?, y: CGFloat?) -> String {
-        if Self.isBrowser(appBundleId) || (appBundleId == nil && x == nil && Self.frontmostAppIsBrowser()) {
+        if Self.isBrowser(appBundleId) || (appBundleId == nil && Self.frontmostAppIsBrowser()) {
             return Self.safariPageInfo()
         }
         guard Self.hasAccessibilityPermission() else {
             return errorJSON("Accessibility permission required.")
         }
+        // x/y kept in signature for source compatibility but ignored — coordinates are
+        // not a supported way to identify elements in this API.
+        _ = x; _ = y
         AuditLog.log(.accessibility, "showMenu(role: \(role ?? "nil"), title: \(title ?? "nil"))")
 
-        var element: Element?
-        if let x = x, let y = y {
-            element = Element.elementAtPoint(CGPoint(x: x, y: y))
-        } else {
-            element = findAXElement(role: role, title: title, value: value, appBundleId: appBundleId)
+        guard let found = findAXElement(role: role, title: title, value: value, appBundleId: appBundleId) else {
+            return errorJSON("Element not found. Provide role/title/value to identify the element — coordinate lookup is not supported.")
         }
-        guard let found = element else { return errorJSON("Element not found") }
         if let elRole = found.role(), Self.isRestricted(elRole) {
             return errorJSON("Cannot interact with \(elRole) — disabled in Accessibility Access")
         }
 
-        // AXorcist: try showMenu action using AXAction enum
         if found.isActionSupported(AXAction.showMenu.rawValue) {
             do {
                 try found.performAction(.showMenu)
@@ -214,17 +212,7 @@ extension AccessibilityService {
                 return errorJSON("AXShowMenu failed: \(error.localizedDescription)")
             }
         }
-
-        // AXorcist: fallback right-click at element center
-        if let frame = found.frame() {
-            do {
-                try InputDriver.click(at: CGPoint(x: frame.midX, y: frame.midY), button: .right, count: 1)
-                return successJSON(["message": "Right-clicked at element center"])
-            } catch {
-                return errorJSON("Right-click failed: \(error.localizedDescription)")
-            }
-        }
-        return errorJSON("Element does not support showing menu and could not determine position")
+        return errorJSON("Element does not support AXShowMenu. Try a different element, or use clickMenuItem to invoke a known menu path.")
     }
 
     // MARK: - Smart Element Click (AXorcist command system)
@@ -296,25 +284,20 @@ extension AccessibilityService {
             Thread.sleep(forTimeInterval: 0.2)
         }
 
-        // Step 4: Click — try AXorcist Element.click() first (handles centering),
-        // then AXPress, then InputDriver.click at coordinates
+        // Step 4: Click via AXorcist — Element.click() first (centers in frame),
+        // then AXPress as a fallback for menu items and other AXPress-only elements.
+        // No coordinate-based fallback: if both AXorcist paths fail, the element is
+        // genuinely not clickable through accessibility, and a raw mouse event would
+        // just produce the wrong result anyway.
         do {
             try element.click()
             return successJSON(["message": "Clicked element", "element": elementProperties(element)])
         } catch {
-            // Element.click needs frame — try AXPress for menu items etc.
             do {
                 try element.performAction(.press)
                 return successJSON(["message": "Pressed element", "element": elementProperties(element)])
             } catch {
-                // Last resort: manual coordinate click
-                if let frame = element.frame(), frame.width > 0, frame.height > 0 {
-                    do {
-                        try InputDriver.click(at: CGPoint(x: frame.midX, y: frame.midY))
-                        return successJSON(["message": "Clicked at center", "x": frame.midX, "y": frame.midY, "element": elementProperties(element)])
-                    } catch {}
-                }
-                return errorJSON("All click methods failed for element: \(element.role() ?? "unknown")")
+                return errorJSON("Element is not clickable through accessibility (Element.click and AXPress both failed) for \(element.role() ?? "unknown") '\(element.title() ?? "")'. Verify the element is enabled and visible, or look for a different actionable element nearby.")
             }
         }
     }
