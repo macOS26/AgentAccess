@@ -341,11 +341,11 @@ extension AccessibilityService {
     // MARK: - Verification Helpers
 
     @MainActor
-    public func captureVerificationScreenshot(action: String, role: String?, title: String?, appBundleId: String?) -> String {
+    public func captureVerificationScreenshot(action: String, role: String?, title: String?, appBundleId: String?) async -> String {
         guard Self.hasAccessibilityPermission() else {
             return errorJSON("Accessibility permission required.")
         }
-        let screenshotResult = captureAllWindows()
+        let screenshotResult = await captureAllWindows()
         var elementStatus = "not_verified"
         if (role ?? title) != nil {
             let findResult = findElement(role: role, title: title, value: nil, appBundleId: appBundleId, timeout: 1.0)
