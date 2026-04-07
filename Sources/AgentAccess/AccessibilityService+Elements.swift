@@ -54,6 +54,17 @@ extension AccessibilityService {
 
     /// Launch/activate an app and return its interactive elements in one call.
     /// This is the fastest way to discover what's clickable in an app.
+    ///
+    /// IMPORTANT: this MUST go through forceLaunchAndActivate() so the full
+    /// pipeline runs (launch if needed, per-window unminimize, app activate,
+    /// NSRunningApplication.activate fallback). The previous implementation
+    /// relied on resolveBundleId() to call launchIfNeeded internally — but
+    /// resolveBundleId has an early return for inputs containing a dot
+    /// (literal bundle IDs), so calls like
+    ///   openApp("com.apple.PhotoBooth")
+    /// would COMPLETELY SKIP the unminimize step. The dock-Genied window
+    /// would never come back, and the LLM would click against a still-hidden
+    /// window. This was the regression the user kept hitting.
     @MainActor
     public func openApp(_ appName: String?, maxDepth: Int = 5) -> String {
         guard Self.hasAccessibilityPermission() else {
@@ -70,14 +81,16 @@ extension AccessibilityService {
 
         AuditLog.log(.accessibility, "openApp(\(appName) → \(bid))")
 
-        // Get app element (resolveBundleId already launched if needed)
+        // Run the full launch + unminimize + activate pipeline regardless of
+        // whether the input was an app name or a literal bundle ID. This is
+        // the call resolveBundleId would skip for bundle-ID inputs.
+        forceLaunchAndActivate(bundleId: bid)
+
+        // Get app element AFTER the activation pipeline so we read post-unminimize state
         guard let app = RunningApplicationHelper.applications(withBundleIdentifier: bid).first,
               let appElement = Element.application(for: app) else {
             return errorJSON("Could not get app element for \(bid)")
         }
-
-        // Activate
-        _ = appElement.activate()
 
         // Collect interactive elements (buttons, text fields, etc.)
         var elements: [[String: Any]] = []

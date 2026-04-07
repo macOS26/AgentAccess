@@ -300,6 +300,16 @@ public final class AccessibilityService: @unchecked Sendable {
     }
 
     /// Launch app if not running, then activate (bring to front) regardless.
+    /// Public wrapper so other files in the AgentAccess module (e.g.
+    /// AccessibilityService+Elements.swift's openApp) can run the full launch
+    /// pipeline without going through resolveBundleId, which has an early
+    /// return for literal bundle IDs and skips launchIfNeeded entirely.
+    @MainActor
+    func forceLaunchAndActivate(bundleId: String) {
+        launchIfNeeded(bundleId: bundleId)
+    }
+
+    /// Launch app if not running, then activate (bring to front) regardless.
     /// This is the byte-for-byte 2.6.0 implementation that worked correctly
     /// for ~7 days. The 2.9.1 attempt to "improve" it by switching to
     /// Element.showWindow() broke docked Photo Booth: showWindow() adds a
