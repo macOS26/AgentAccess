@@ -198,67 +198,58 @@ public final class AccessibilityService: @unchecked Sendable {
 
     // MARK: - App Name → Bundle ID Resolution
 
-    // MARK: - Static App Name → Bundle ID Lookup Table
+    // MARK: - Installed Apps Discovery
+    //
+    // The previous implementation was a 50-entry hardcoded lookup table
+    // that had to be manually maintained every time Apple shipped a new
+    // built-in app or the user installed a third-party app the agent
+    // wanted to target. We now scan the standard macOS app directories
+    // at first access, read each .app bundle's Info.plist, and build the
+    // name→bundleID map from CFBundleIdentifier + CFBundleName /
+    // CFBundleDisplayName. Adding an app to /Applications automatically
+    // makes it discoverable — no code changes, no hardcoding.
+    //
+    // The scan is lazy (computed on first access via the static let
+    // initializer) and cached for the process lifetime. Cost: ~50-200ms
+    // I/O for the initial scan, depending on how many apps are installed.
+    // Apps installed AFTER startup won't appear until the next launch,
+    // which is acceptable for almost every use case.
 
-    /// Known macOS app names → bundle IDs. Works even if app isn't running.
+    /// Installed apps discovered at first access. Maps lowercased display
+    /// name (and a no-spaces variant) to bundle identifier. Source of
+    /// truth: every .app bundle in the standard macOS app directories.
     private static let knownApps: [String: String] = {
         var map: [String: String] = [:]
-        let apps: [(String, String)] = [
-            ("calculator", "com.apple.calculator"),
-            ("calendar", "com.apple.iCal"),
-            ("contacts", "com.apple.AddressBook"),
-            ("facetime", "com.apple.FaceTime"),
-            ("finder", "com.apple.finder"),
-            ("freeform", "com.apple.freeform"),
-            ("garageband", "com.apple.garageband"),
-            ("imovie", "com.apple.iMovieApp"),
-            ("keynote", "com.apple.Keynote"),
-            ("mail", "com.apple.mail"),
-            ("maps", "com.apple.Maps"),
-            ("messages", "com.apple.MobileSMS"),
-            ("music", "com.apple.Music"),
-            ("notes", "com.apple.Notes"),
-            ("numbers", "com.apple.iWork.Numbers"),
-            ("pages", "com.apple.iWork.Pages"),
-            ("photo booth", "com.apple.PhotoBooth"),
-            ("photobooth", "com.apple.PhotoBooth"),
-            ("photos", "com.apple.Photos"),
-            ("podcasts", "com.apple.podcasts"),
-            ("preview", "com.apple.Preview"),
-            ("quicktime player", "com.apple.QuickTimePlayerX"),
-            ("quicktime", "com.apple.QuickTimePlayerX"),
-            ("reminders", "com.apple.reminders"),
-            ("safari", "com.apple.Safari"),
-            ("shortcuts", "com.apple.shortcuts"),
-            ("system settings", "com.apple.systempreferences"),
-            ("system preferences", "com.apple.systempreferences"),
-            ("terminal", "com.apple.Terminal"),
-            ("textedit", "com.apple.TextEdit"),
-            ("text edit", "com.apple.TextEdit"),
-            ("tv", "com.apple.TV"),
-            ("voice memos", "com.apple.VoiceMemos"),
-            ("weather", "com.apple.weather"),
-            ("xcode", "com.apple.dt.Xcode"),
-            ("automator", "com.apple.Automator"),
-            ("console", "com.apple.Console"),
-            ("disk utility", "com.apple.DiskUtility"),
-            ("font book", "com.apple.FontBook"),
-            ("activity monitor", "com.apple.ActivityMonitor"),
-            ("script editor", "com.apple.ScriptEditor2"),
-            ("google chrome", "com.google.Chrome"),
-            ("chrome", "com.google.Chrome"),
-            ("firefox", "org.mozilla.firefox"),
-            ("microsoft edge", "com.microsoft.edgemac"),
-            ("edge", "com.microsoft.edgemac"),
-            ("slack", "com.tinyspeck.slackmacgap"),
-            ("zoom", "us.zoom.xos"),
-            ("spotify", "com.spotify.client"),
-            ("discord", "com.hnc.Discord"),
-            ("github desktop", "com.github.GitHubClient"),
-            ("visual studio code", "com.microsoft.VSCode"),
-            ("vscode", "com.microsoft.VSCode"),
+        let fm = FileManager.default
+        let directories = [
+            "/Applications",
+            "/Applications/Utilities",
+            "/System/Applications",
+            "/System/Applications/Utilities",
+            NSHomeDirectory() + "/Applications",
         ]
-        for (name, bid) in apps { map[name] = bid }
+        for dir in directories {
+            guard let entries = try? fm.contentsOfDirectory(atPath: dir) else { continue }
+            for entry in entries where entry.hasSuffix(".app") {
+                let appPath = "\(dir)/\(entry)"
+                let plistPath = "\(appPath)/Contents/Info.plist"
+                guard let plist = NSDictionary(contentsOfFile: plistPath),
+                      let bundleID = plist["CFBundleIdentifier"] as? String,
+                      !bundleID.isEmpty else { continue }
+                // Prefer CFBundleDisplayName, fall back to CFBundleName,
+                // then to the .app filename without extension. Some apps
+                // (especially older ones) only set one of these.
+                let displayName = (plist["CFBundleDisplayName"] as? String)
+                    ?? (plist["CFBundleName"] as? String)
+                    ?? (entry as NSString).deletingPathExtension
+                let lower = displayName.lowercased()
+                // Insert the lowercased display name and a no-spaces
+                // variant so "photobooth" matches "Photo Booth".
+                map[lower] = bundleID
+                let noSpaces = lower.replacingOccurrences(of: " ", with: "")
+                if noSpaces != lower { map[noSpaces] = bundleID }
+            }
+        }
         return map
     }()
 
