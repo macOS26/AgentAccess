@@ -299,46 +299,41 @@ public final class AccessibilityService: @unchecked Sendable {
         return input
     }
 
-    /// Launch app if not running, then bring it forward via a layered pipeline:
-    ///   1. NSWorkspace.openApplication if the app isn't running yet.
-    ///      AXorcist has no command to *start* a non-running process.
-    ///   2. AXorcist Element.showWindow() per window — unminimizes if minimized,
-    ///      unhides the parent app if hidden, AND raises the window to front in a
-    ///      single atomic call (Element+WindowOperations.swift:177-195).
-    ///   3. AXorcist Element.activate() on the app element to set kAXFrontmost.
-    ///   4. NSRunningApplication.activate() as the final fallback. This was
-    ///      regression-bisected to AgentAccess 2.3.1 which added the comment
-    ///      "NSRunningApplication.activate as fallback — works for docked apps".
-    ///      AXorcist's raise paths handle most apps but the dock-only case (app
-    ///      whose only window is in the Dock as a Genie-minimized thumbnail) is
-    ///      reliably fixed by NSRunningApplication.activate, so it stays.
+    /// Launch app if not running, then activate (bring to front) regardless.
+    /// This is the byte-for-byte 2.6.0 implementation that worked correctly
+    /// for ~7 days. The 2.9.1 attempt to "improve" it by switching to
+    /// Element.showWindow() broke docked Photo Booth: showWindow() adds a
+    /// per-window performAction(.raise) on a window that was just unminimized,
+    /// which races against the AX queue and fails silently. The simpler
+    /// per-window unminimizeWindow() loop followed by appElement.activate() and
+    /// the NSRunningApplication.activate() fallback is the combination that
+    /// actually works for the dock-Genie case.
+    ///
+    /// DO NOT REPLACE THIS WITH showWindow(). It looks equivalent. It is not.
     @MainActor
     private func launchIfNeeded(bundleId: String) {
-        // 1. Launch if not running
         if RunningApplicationHelper.applications(withBundleIdentifier: bundleId).isEmpty {
             if let url = NSWorkspace.shared.urlForApplication(withBundleIdentifier: bundleId) {
                 NSWorkspace.shared.openApplication(at: url, configuration: NSWorkspace.OpenConfiguration())
                 Thread.sleep(forTimeInterval: 1.0)
             }
         }
-        guard let app = RunningApplicationHelper.applications(withBundleIdentifier: bundleId).first else { return }
-
-        // 2. AXorcist showWindow per window (unminimize + unhide app + raise)
-        if let appElement = Element.application(for: app) {
-            if let windows = appElement.windows() {
+        // Always activate — handles minimized/docked apps
+        if let app = RunningApplicationHelper.applications(withBundleIdentifier: bundleId).first {
+            // Unminimize any minimized windows first
+            if let appElement = Element.application(for: app),
+               let windows = appElement.windows() {
                 for window in windows {
-                    _ = window.showWindow()
+                    if window.isMinimized() == true {
+                        _ = window.unminimizeWindow()
+                    }
                 }
+                _ = appElement.activate()
             }
-            // 3. AXorcist app-element activate (kAXFrontmost)
-            _ = appElement.activate()
+            // NSRunningApplication.activate as fallback — works for docked apps
+            app.activate()
+            Thread.sleep(forTimeInterval: 0.3)
         }
-
-        // 4. NSRunningApplication.activate fallback — works for docked apps
-        //    where the AXorcist raise paths can't reach a Genie-minimized window.
-        //    DO NOT remove this line: dropping it regressed 2.9.0 → 2.9.1.
-        app.activate()
-        Thread.sleep(forTimeInterval: 0.3)
     }
 
     // MARK: - Helpers
