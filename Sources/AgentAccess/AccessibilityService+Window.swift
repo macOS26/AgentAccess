@@ -256,7 +256,7 @@ extension AccessibilityService {
                 .map { "\($0.localizedName ?? "?") — \($0.bundleIdentifier ?? "?")\($0.isActive ? " (active)" : "")" }
             return successJSON(["apps": apps])
         default:
-            return errorJSON("Unknown action: \(action). Use launch, activate, quit, or list.")
+            return errorJSON("Unknown action: \(action). Use launch, activate, hide, unhide, quit, or list.")
         }
     }
 
