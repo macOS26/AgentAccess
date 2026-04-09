@@ -253,9 +253,51 @@ public final class AccessibilityService: @unchecked Sendable {
         return map
     }()
 
-    /// Resolve an app name or bundle ID to an actual bundle ID.
-    /// Uses static lookup table (works even if app isn't running), then searches running apps.
-    /// Auto-launches the app if not running.
+    /// Pure name → bundle ID lookup. **No side effects** — does NOT launch the
+    /// app and does NOT bring it to front. Use this for read-only accessibility
+    /// queries (find_element, get_properties, list_windows, inspect_element,
+    /// screenshot, etc.) where you do NOT want resolveBundleId's auto-launch
+    /// behavior to spawn an app the user never asked to open.
+    ///
+    /// Returns nil for empty/focused/frontmost input. Returns the input
+    /// unchanged if no match (so callers can pass arbitrary bundle IDs through).
+    @MainActor
+    public func lookupBundleId(_ input: String?) -> String? {
+        guard let input = input else { return nil }
+
+        let lower = input.lowercased().trimmingCharacters(in: .whitespaces)
+        if lower == "focused" || lower == "frontmost" || lower.isEmpty { return nil }
+
+        // Already a bundle ID (contains dots)
+        if input.contains(".") { return input }
+
+        // Static lookup table (works even if app isn't running)
+        if let bid = Self.knownApps[lower] { return bid }
+        // Try without spaces: "photobooth" → "photo booth"
+        let noSpaces = lower.replacingOccurrences(of: " ", with: "")
+        if let bid = Self.knownApps.first(where: { $0.key.replacingOccurrences(of: " ", with: "") == noSpaces })?.value {
+            return bid
+        }
+
+        // Search running apps by name (no launch — only matches if running)
+        let apps = RunningApplicationHelper.allApplications()
+        if let match = apps.first(where: { ($0.localizedName ?? "").lowercased() == lower }) {
+            return match.bundleIdentifier
+        }
+        if let match = apps.first(where: { ($0.localizedName ?? "").lowercased().contains(lower) }) {
+            return match.bundleIdentifier
+        }
+
+        return input
+    }
+
+    /// Resolve an app name or bundle ID to an actual bundle ID, **and auto-launch**
+    /// the app if it isn't already running. Use this for write/action operations
+    /// (click_element, type_into_element, perform_action, set_window_frame, etc.)
+    /// that require the target app to be live.
+    ///
+    /// For read-only queries that should NOT cause an app launch, call
+    /// `lookupBundleId(_:)` instead.
     @MainActor
     public func resolveBundleId(_ input: String?) -> String? {
         guard let input = input else { return nil }
