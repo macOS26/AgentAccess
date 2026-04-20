@@ -199,6 +199,18 @@ extension AccessibilityService {
     public func manageApp(action: String, bundleId: String?, name: String?) -> String {
         AuditLog.log(.accessibility, "manageApp(action: \(action), bundleId: \(bundleId ?? "nil"), name: \(name ?? "nil"))")
 
+        // Normalize inputs: callers frequently pass a natural app name like
+        // "Photo Booth" in the `bundleId` slot (it's the only field the
+        // dispatcher forwards). If `bundleId` lacks a dot it can't be a real
+        // reverse-DNS bundle ID — promote it to `name` so the name-resolution
+        // paths below (resolveBundleId + directory scan) get a chance to run.
+        var bundleId = bundleId
+        var name = name
+        if let bid = bundleId, !bid.contains(".") {
+            if name == nil { name = bid }
+            bundleId = nil
+        }
+
         switch action {
         case "launch":
             // App launching requires NSWorkspace — this is expected
@@ -206,10 +218,20 @@ extension AccessibilityService {
                 NSWorkspace.shared.openApplication(at: url, configuration: NSWorkspace.OpenConfiguration())
                 return successJSON(["message": "Launched \(bid)"])
             } else if let n = name {
-                let url = URL(fileURLWithPath: "/Applications/\(n).app")
-                if FileManager.default.fileExists(atPath: url.path) {
+                // Resolve name → bundle ID via SDEF catalog + installed-apps scan
+                // (covers /Applications, /System/Applications, ~/Applications).
+                if let resolvedBid = resolveBundleId(n),
+                   let url = NSWorkspace.shared.urlForApplication(withBundleIdentifier: resolvedBid) {
                     NSWorkspace.shared.openApplication(at: url, configuration: NSWorkspace.OpenConfiguration())
-                    return successJSON(["message": "Launched \(n)"])
+                    return successJSON(["message": "Launched \(resolvedBid)"])
+                }
+                // Fallback: check common .app locations directly by name.
+                for dir in ["/Applications", "/System/Applications", "/System/Applications/Utilities", NSHomeDirectory() + "/Applications"] {
+                    let url = URL(fileURLWithPath: "\(dir)/\(n).app")
+                    if FileManager.default.fileExists(atPath: url.path) {
+                        NSWorkspace.shared.openApplication(at: url, configuration: NSWorkspace.OpenConfiguration())
+                        return successJSON(["message": "Launched \(n)"])
+                    }
                 }
                 return errorJSON("App not found: \(n)")
             }
@@ -220,10 +242,19 @@ extension AccessibilityService {
                let appElement = Element.application(for: app) {
                 _ = appElement.activate()
                 return successJSON(["message": "Activated \(bid)"])
-            } else if let n = name, let app = RunningApplicationHelper.allApplications().first(where: { $0.localizedName == n }),
-                      let appElement = Element.application(for: app) {
-                _ = appElement.activate()
-                return successJSON(["message": "Activated \(n)"])
+            } else if let n = name {
+                // Try resolved bundle ID first, then fall back to localizedName match.
+                if let resolvedBid = resolveBundleId(n),
+                   let app = RunningApplicationHelper.applications(withBundleIdentifier: resolvedBid).first,
+                   let appElement = Element.application(for: app) {
+                    _ = appElement.activate()
+                    return successJSON(["message": "Activated \(resolvedBid)"])
+                }
+                if let app = RunningApplicationHelper.allApplications().first(where: { $0.localizedName == n }),
+                   let appElement = Element.application(for: app) {
+                    _ = appElement.activate()
+                    return successJSON(["message": "Activated \(n)"])
+                }
             }
             return errorJSON("App not running")
         case "hide":
@@ -246,9 +277,16 @@ extension AccessibilityService {
             if let bid = bundleId, let app = RunningApplicationHelper.applications(withBundleIdentifier: bid).first {
                 app.terminate()
                 return successJSON(["message": "Quit \(bid)"])
-            } else if let n = name, let app = RunningApplicationHelper.allApplications().first(where: { $0.localizedName == n }) {
-                app.terminate()
-                return successJSON(["message": "Quit \(n)"])
+            } else if let n = name {
+                if let resolvedBid = resolveBundleId(n),
+                   let app = RunningApplicationHelper.applications(withBundleIdentifier: resolvedBid).first {
+                    app.terminate()
+                    return successJSON(["message": "Quit \(resolvedBid)"])
+                }
+                if let app = RunningApplicationHelper.allApplications().first(where: { $0.localizedName == n }) {
+                    app.terminate()
+                    return successJSON(["message": "Quit \(n)"])
+                }
             }
             return errorJSON("App not running")
         case "list":
