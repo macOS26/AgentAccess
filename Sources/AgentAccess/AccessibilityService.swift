@@ -305,8 +305,15 @@ public final class AccessibilityService: @unchecked Sendable {
         let lower = input.lowercased().trimmingCharacters(in: .whitespaces)
         if lower == "focused" || lower == "frontmost" || lower.isEmpty { return nil }
 
-        // Already a bundle ID (contains dots)
-        if input.contains(".") { return input }
+        // Already a bundle ID (contains dots) — still launch it. Before, this
+        // short-circuited without launching, which forced cloud LLMs to call
+        // open_app first just to get Photo Booth running before click_element.
+        // Apple AI gets away without that extra turn because it happens to pass
+        // the natural name which flows through the launchIfNeeded path below.
+        if input.contains(".") {
+            launchIfNeeded(bundleId: input)
+            return input
+        }
 
         // Static lookup table (works even if app isn't running)
         if let bid = Self.knownApps[lower] {
